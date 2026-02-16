@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+    ###> doctrine/doctrine-bundle ###
+    database:
+        image: mysql:8.0
+        container_name: bitchest_mysql
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: bitchest
+        ports:
+            - "3307:3306" # On mappe le port 3307 de ton PC vers le 3306 du Docker
+        volumes:
+            - db_data:/var/lib/mysql
+###< doctrine/doctrine-bundle ###
+
+volumes:
+    db_data:
