@@ -20,30 +20,29 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // 1. Création de l'Admin
+        // 1. Admin
         $admin = new User();
         $admin->setEmail("admin@bitchest.com");
         $admin->setRoles(["ROLE_ADMIN"]);
         $admin->setFirstName("Admin");
         $admin->setLastName("System");
         $admin->setPhoneNumber("0600000000");
-        // Le mot de passe sera "password"
-        $password = $this->hasher->hashPassword($admin, "password");
-        $admin->setPassword($password);
-        $admin->setBalance(0);
+        $admin->setPassword($this->hasher->hashPassword($admin, "password"));
+        $admin->setBalance("0.00");
         $manager->persist($admin);
 
-        // 2. Création d'un User classique
+        // 2. User
         $user = new User();
         $user->setEmail("user@bitchest.com");
+        $user->setRoles(["ROLE_USER"]);
         $user->setFirstName("John");
         $user->setLastName("Doe");
         $user->setPhoneNumber("0612345678");
-        $user->setPassword($password); // Même mot de passe "password"
-        $user->setBalance(500);
+        $user->setPassword($this->hasher->hashPassword($user, "password"));
+        $user->setBalance("500.00");
         $manager->persist($user);
 
-        // 3. Création des Cryptos et des Prix
+        // 3. Cryptos + prix
         $cryptosData = [
             ["name" => "Bitcoin", "abbr" => "BTC", "base_price" => 30000],
             ["name" => "Ethereum", "abbr" => "ETH", "base_price" => 1800],
@@ -58,25 +57,20 @@ class AppFixtures extends Fixture
             $crypto->setAbbreviation($data["abbr"]);
             $manager->persist($crypto);
 
-            // Générer 30 jours d'historique de prix
-            // On part d'il y a 30 jours jusqu'à aujourd'hui
             $currentPrice = $data["base_price"];
 
             for ($i = 30; $i >= 0; $i--) {
                 $price = new Price();
                 $price->setCrypto($crypto);
 
-                // On simule une date (aujourd'hui moins $i jours)
                 $date = new \DateTime();
-                $date->modify("- $i days");
+                $date->modify("-$i days");
                 $price->setDate($date);
 
-                // On fait varier le prix un peu au hasard (+/- 5%)
-                $variation = rand(-50, 50) / 1000; // entre -0.05 et +0.05
+                $variation = rand(-50, 50) / 1000;
                 $currentPrice = $currentPrice * (1 + $variation);
 
-                $price->setValue((string) $currentPrice); // Convertir en string pour le type DECIMAL
-
+                $price->setValue(number_format($currentPrice, 8, ".", ""));
                 $manager->persist($price);
             }
         }

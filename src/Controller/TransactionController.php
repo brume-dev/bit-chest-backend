@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Crypto;
 use App\Entity\Transaction;
+use App\Entity\User;
 use App\Repository\CryptoRepository;
 use App\Repository\PriceRepository;
 use App\Repository\TransactionRepository;
@@ -84,6 +86,13 @@ class TransactionController extends AbstractController
             return $this->json(["message" => "Invalid request body."], 400);
         }
 
+        if ((float) $amount <= 0) {
+            return $this->json(
+                ["message" => "Amount must be greater than zero."],
+                400,
+            );
+        }
+
         $crypto = $this->cryptoRepository->find($cryptoId);
         if (!$crypto) {
             return $this->json(["message" => "Crypto not found."], 404);
@@ -94,7 +103,6 @@ class TransactionController extends AbstractController
             return $this->json(["message" => "Price not found."], 404);
         }
 
-        // Ensure the price actually belongs to the given crypto
         if ($price->getCrypto() !== $crypto) {
             return $this->json(
                 ["message" => "Price does not match the given crypto."],
@@ -105,7 +113,26 @@ class TransactionController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $transaction = new Transaction()
+        $totalCost = bcmul((string) $amount, $price->getValue(), 8);
+
+        if ($type === "buy") {
+            if (bccomp($user->getBalance(), $totalCost, 2) < 0) {
+                return $this->json(["message" => "Insufficient balance."], 400);
+            }
+            $user->setBalance(bcsub($user->getBalance(), $totalCost, 2));
+        } elseif ($type === "sell") {
+            $held = $this->getHeldAmount($user, $crypto);
+            if (bccomp($held, (string) $amount, 8) < 0) {
+                return $this->json(
+                    ["message" => "Insufficient holdings."],
+                    400,
+                );
+            }
+            $user->setBalance(bcadd($user->getBalance(), $totalCost, 2));
+        }
+
+        $transaction = new Transaction();
+        $transaction
             ->setUser($user)
             ->setCrypto($crypto)
             ->setPrice($price)
@@ -120,6 +147,27 @@ class TransactionController extends AbstractController
             ["transaction" => $this->serialize($transaction)],
             201,
         );
+    }
+
+    private function getHeldAmount(
+        \App\Entity\User $user,
+        \App\Entity\Crypto $crypto,
+    ): string {
+        $transactions = $this->transactionRepository->findBy([
+            "user" => $user,
+            "crypto" => $crypto,
+        ]);
+
+        $held = "0";
+        foreach ($transactions as $t) {
+            if ($t->getType() === "buy") {
+                $held = bcadd($held, $t->getAmount(), 8);
+            } else {
+                $held = bcsub($held, $t->getAmount(), 8);
+            }
+        }
+
+        return $held;
     }
 
     // -------------------------------------------------------------------------

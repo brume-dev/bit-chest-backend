@@ -51,7 +51,6 @@ class AdminUserController extends AbstractController
             "phoneNumber",
             "role",
         ];
-
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 return $this->json(["error" => "Missing field: $field"], 400);
@@ -72,15 +71,14 @@ class AdminUserController extends AbstractController
             ->setFirstName($data["firstName"])
             ->setLastName($data["lastName"])
             ->setPhoneNumber($data["phoneNumber"])
+            ->setBalance("0.00")
             ->setPassword(
                 $passwordHasher->hashPassword($user, $data["password"]),
             );
 
-        if ($data["role"] === "admin") {
-            $user->setRoles(["ROLE_ADMIN"]);
-        } else {
-            $user->setRoles(["ROLE_USER"]);
-        }
+        $user->setRoles(
+            $data["role"] === "admin" ? ["ROLE_ADMIN"] : ["ROLE_USER"],
+        );
 
         $em->persist($user);
         $em->flush();
