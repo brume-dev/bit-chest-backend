@@ -103,4 +103,42 @@ class AuthController extends AbstractController
             "roles" => $user->getRoles(),
         ]);
     }
+
+    #[Route("/auth/me", name: "api_update_me", methods: ["PATCH"])]
+    public function updateMe(
+        Request $request,
+        EntityManagerInterface $em,
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        $required = ["firstName", "lastName", "phoneNumber"];
+        foreach ($required as $field) {
+            if (empty($data[$field])) {
+                return $this->json(
+                    ["error" => "Missing field: $field"],
+                    Response::HTTP_BAD_REQUEST,
+                );
+            }
+        }
+
+        $user
+            ->setFirstName($data["firstName"])
+            ->setLastName($data["lastName"])
+            ->setPhoneNumber($data["phoneNumber"]);
+
+        $em->flush();
+
+        return $this->json([
+            "id" => $user->getId(),
+            "email" => $user->getEmail(),
+            "firstName" => $user->getFirstName(),
+            "lastName" => $user->getLastName(),
+            "phoneNumber" => $user->getPhoneNumber(),
+            "balance" => $user->getBalance(),
+            "roles" => $user->getRoles(),
+        ]);
+    }
 }
