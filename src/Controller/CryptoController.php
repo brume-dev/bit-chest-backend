@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route("/crypto", name: "api_crypto_")]
+#[Route("/api/crypto", name: "api_crypto_")]
 class CryptoController extends AbstractController
 {
     #[Route("", name: "list", methods: ["GET"])]

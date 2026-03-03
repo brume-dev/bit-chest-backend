@@ -114,20 +114,15 @@ class AuthController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
-        $required = ["firstName", "lastName", "phoneNumber"];
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                return $this->json(
-                    ["error" => "Missing field: $field"],
-                    Response::HTTP_BAD_REQUEST,
-                );
-            }
+        if (isset($data["firstName"])) {
+            $user->setFirstName($data["firstName"]);
         }
-
-        $user
-            ->setFirstName($data["firstName"])
-            ->setLastName($data["lastName"])
-            ->setPhoneNumber($data["phoneNumber"]);
+        if (isset($data["lastName"])) {
+            $user->setLastName($data["lastName"]);
+        }
+        if (isset($data["phoneNumber"])) {
+            $user->setPhoneNumber($data["phoneNumber"]);
+        }
 
         $em->flush();
 
