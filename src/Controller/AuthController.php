@@ -55,7 +55,7 @@ class AuthController extends AbstractController
             ->setFirstName($data["firstName"])
             ->setLastName($data["lastName"])
             ->setPhoneNumber($data["phoneNumber"])
-            ->setBalance("0.00")
+            ->setBalance("500.00")
             ->setRoles(["ROLE_USER"])
             ->setPassword(
                 $passwordHasher->hashPassword($user, $data["password"]),

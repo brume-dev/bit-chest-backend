@@ -71,7 +71,7 @@ class AdminUserController extends AbstractController
             ->setFirstName($data["firstName"])
             ->setLastName($data["lastName"])
             ->setPhoneNumber($data["phoneNumber"])
-            ->setBalance("0.00")
+            ->setBalance("500.00")
             ->setPassword(
                 $passwordHasher->hashPassword($user, $data["password"]),
             );
