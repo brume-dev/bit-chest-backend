@@ -46,6 +46,24 @@ class TransactionController extends AbstractController
     }
 
     /**
+     * GET /api/transaction/all
+     * Admin only — returns all transactions across all users.
+     */
+    #[Route("/all", name: "transaction_all", methods: ["GET"])]
+    #[IsGranted("ROLE_ADMIN")]
+    public function all(): JsonResponse
+    {
+        $transactions = $this->transactionRepository->findAll();
+
+        return $this->json([
+            "transactions" => array_map(
+                fn(Transaction $t) => $this->serialize($t),
+                $transactions,
+            ),
+        ]);
+    }
+
+    /**
      * GET /transaction/:id
      * Returns a single transaction belonging to the authenticated user.
      */
