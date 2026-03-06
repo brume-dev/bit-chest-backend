@@ -62,4 +62,27 @@ class Crypto
         $this->abbreviation = $abbreviation;
         return $this;
     }
+    public function getPrices(): Collection
+    {
+        return $this->prices;
+    }
+
+    public function addPrice(Price $price): self
+    {
+        if (!$this->prices->contains($price)) {
+            $this->prices->add($price);
+            $price->setCrypto($this);
+        }
+        return $this;
+    }
+
+    public function removePrice(Price $price): self
+    {
+        if ($this->prices->removeElement($price)) {
+            if ($price->getCrypto() === $this) {
+                $price->setCrypto(null);
+            }
+        }
+        return $this;
+    }
 }

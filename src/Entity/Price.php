@@ -13,6 +13,7 @@ class Price
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["crypto:read"])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 20, scale: 8)]
