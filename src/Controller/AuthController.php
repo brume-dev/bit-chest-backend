@@ -136,4 +136,53 @@ class AuthController extends AbstractController
             "roles" => $user->getRoles(),
         ]);
     }
+
+    #[
+        Route(
+            "/auth/change-password",
+            name: "api_change_password",
+            methods: ["POST"],
+        ),
+    ]
+    public function changePassword(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $em,
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $data = json_decode($request->getContent(), true);
+
+        if (empty($data["currentPassword"]) || empty($data["newPassword"])) {
+            return $this->json(
+                ["error" => "Missing currentPassword or newPassword"],
+                Response::HTTP_BAD_REQUEST,
+            );
+        }
+
+        if (
+            !$passwordHasher->isPasswordValid($user, $data["currentPassword"])
+        ) {
+            return $this->json(
+                ["error" => "Current password is incorrect"],
+                Response::HTTP_UNAUTHORIZED,
+            );
+        }
+
+        if (strlen($data["newPassword"]) < 8) {
+            return $this->json(
+                ["error" => "New password must be at least 8 characters"],
+                Response::HTTP_BAD_REQUEST,
+            );
+        }
+
+        $user->setPassword(
+            $passwordHasher->hashPassword($user, $data["newPassword"]),
+        );
+
+        $em->flush();
+
+        return $this->json(["message" => "Password updated successfully"]);
+    }
 }
