@@ -1,5 +1,7 @@
 <?php
 
+// CryptoRepository provides data access methods for Crypto entities
+
 namespace App\Repository;
 
 use App\Entity\Crypto;

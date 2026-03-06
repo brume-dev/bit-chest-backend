@@ -1,5 +1,7 @@
 <?php
 
+// AppFixtures loads initial data into the database for testing
+
 namespace App\DataFixtures;
 
 use App\Entity\Crypto;

@@ -1,5 +1,7 @@
 <?php
 
+// Crypto entity represents a cryptocurrency in the system
+
 namespace App\Entity;
 
 use App\Repository\CryptoRepository;

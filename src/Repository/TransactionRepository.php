@@ -1,5 +1,7 @@
 <?php
 
+// TransactionRepository provides data access methods for Transaction entities
+
 namespace App\Repository;
 
 use App\Entity\Transaction;

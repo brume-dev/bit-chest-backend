@@ -1,5 +1,7 @@
 <?php
 
+// AuthController handles user authentication and registration
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -40,8 +42,8 @@ class AuthController extends AbstractController
 
         if (
             $em
-                ->getRepository(User::class)
-                ->findOneBy(["email" => $data["email"]])
+            ->getRepository(User::class)
+            ->findOneBy(["email" => $data["email"]])
         ) {
             return $this->json(
                 ["error" => "Email already registered"],

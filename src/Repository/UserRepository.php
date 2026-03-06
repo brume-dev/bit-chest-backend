@@ -1,5 +1,7 @@
 <?php
 
+// UserRepository provides data access methods for User entities and implements password upgrading
+
 namespace App\Repository;
 
 use App\Entity\User;

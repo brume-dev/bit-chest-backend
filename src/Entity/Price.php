@@ -1,5 +1,7 @@
 <?php
 
+// Price entity stores price information for cryptocurrencies
+
 namespace App\Entity;
 
 use App\Repository\PriceRepository;

@@ -1,4 +1,5 @@
 <?php
+// CryptoController handles cryptocurrency related API endpoints
 namespace App\Controller;
 
 use App\Repository\CryptoRepository;

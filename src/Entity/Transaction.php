@@ -1,5 +1,7 @@
 <?php
 
+// Transaction entity represents a user's transaction record
+
 namespace App\Entity;
 
 use App\Repository\TransactionRepository;

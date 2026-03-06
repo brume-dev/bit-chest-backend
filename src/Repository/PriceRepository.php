@@ -1,5 +1,7 @@
 <?php
 
+// PriceRepository provides data access methods for Price entities
+
 namespace App\Repository;
 
 use App\Entity\Price;

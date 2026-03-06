@@ -26,6 +26,7 @@ class TransactionController extends AbstractController
         private EntityManagerInterface $em,
     ) {}
 
+    // Lists all transactions for the authenticated user
     /**
      * GET /transaction
      * Returns all transactions for the authenticated user.
@@ -45,6 +46,7 @@ class TransactionController extends AbstractController
         ]);
     }
 
+    // Lists all transactions across all users (admin only)
     /**
      * GET /api/transaction/all
      * Admin only — returns all transactions across all users.
@@ -63,6 +65,7 @@ class TransactionController extends AbstractController
         ]);
     }
 
+    // Returns a single transaction for the authenticated user
     /**
      * GET /transaction/:id
      * Returns a single transaction belonging to the authenticated user.
@@ -74,13 +77,14 @@ class TransactionController extends AbstractController
         $user = $this->getUser();
         $transaction = $this->transactionRepository->find($id);
 
-        if (!$transaction || $transaction->getUser() !== $user) {
+        if (!$transaction || $transaction->getUser() !== $user) { // Checks if transaction exists and belongs to user
             return $this->json(["message" => "Transaction not found."], 404);
         }
 
         return $this->json(["transaction" => $this->serialize($transaction)]);
     }
 
+    // Creates a new buy/sell transaction for the user
     /**
      * POST /transaction
      * Creates a new buy/sell transaction for the authenticated user.
@@ -100,11 +104,11 @@ class TransactionController extends AbstractController
             !$priceId ||
             $amount === null ||
             !in_array($type, ["buy", "sell"], true)
-        ) {
+        ) { // Validates required fields in request body
             return $this->json(["message" => "Invalid request body."], 400);
         }
 
-        if ((float) $amount <= 0) {
+        if ((float) $amount <= 0) { // Checks if amount is greater than zero
             return $this->json(
                 ["message" => "Amount must be greater than zero."],
                 400,
@@ -112,16 +116,16 @@ class TransactionController extends AbstractController
         }
 
         $crypto = $this->cryptoRepository->find($cryptoId);
-        if (!$crypto) {
+        if (!$crypto) { // Checks if the specified crypto exists
             return $this->json(["message" => "Crypto not found."], 404);
         }
 
         $price = $this->priceRepository->find($priceId);
-        if (!$price) {
+        if (!$price) { // Checks if the specified price exists
             return $this->json(["message" => "Price not found."], 404);
         }
 
-        if ($price->getCrypto() !== $crypto) {
+        if ($price->getCrypto() !== $crypto) { // Checks if price matches the given crypto
             return $this->json(
                 ["message" => "Price does not match the given crypto."],
                 400,
@@ -134,13 +138,13 @@ class TransactionController extends AbstractController
         $totalCost = bcmul((string) $amount, $price->getValue(), 8);
 
         if ($type === "buy") {
-            if (bccomp($user->getBalance(), $totalCost, 2) < 0) {
+            if (bccomp($user->getBalance(), $totalCost, 2) < 0) { // Checks sufficient balance for buy
                 return $this->json(["message" => "Insufficient balance."], 400);
             }
             $user->setBalance(bcsub($user->getBalance(), $totalCost, 2));
         } elseif ($type === "sell") {
             $held = $this->getHeldAmount($user, $crypto);
-            if (bccomp($held, (string) $amount, 8) < 0) {
+            if (bccomp($held, (string) $amount, 8) < 0) { // Checks sufficient holdings for sell
                 return $this->json(
                     ["message" => "Insufficient holdings."],
                     400,
@@ -167,6 +171,7 @@ class TransactionController extends AbstractController
         );
     }
 
+    // Calculates held amount of crypto for the user
     private function getHeldAmount(
         \App\Entity\User $user,
         \App\Entity\Crypto $crypto,
@@ -177,10 +182,10 @@ class TransactionController extends AbstractController
         ]);
 
         $held = "0";
-        foreach ($transactions as $t) {
-            if ($t->getType() === "buy") {
+        foreach ($transactions as $t) { // Iterates over user's transactions for this crypto
+            if ($t->getType() === "buy") { // Adds to held for buy transactions
                 $held = bcadd($held, $t->getAmount(), 8);
-            } else {
+            } else { // Subtracts from held for sell transactions
                 $held = bcsub($held, $t->getAmount(), 8);
             }
         }
@@ -192,6 +197,7 @@ class TransactionController extends AbstractController
     // Serialization helper
     // -------------------------------------------------------------------------
 
+    // Serializes transaction data for JSON response
     private function serialize(Transaction $t): array
     {
         return [

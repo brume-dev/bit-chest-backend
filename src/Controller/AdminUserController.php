@@ -1,5 +1,7 @@
 <?php
 
+// AdminUserController manages administrative user operations
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -59,8 +61,8 @@ class AdminUserController extends AbstractController
 
         if (
             $em
-                ->getRepository(User::class)
-                ->findOneBy(["email" => $data["email"]])
+            ->getRepository(User::class)
+            ->findOneBy(["email" => $data["email"]])
         ) {
             return $this->json(["error" => "Email already registered"], 409);
         }

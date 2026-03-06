@@ -1,5 +1,7 @@
 <?php
 
+// User entity represents a user in the application
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
